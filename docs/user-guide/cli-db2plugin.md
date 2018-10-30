@@ -31,13 +31,19 @@ There are **two methods** that you can use to install the Zowe CLI Plug-in for I
 
 If you installed Zowe CLI from **Bintray**, complete the following steps:
 
-1. Open a command line window and issue the following command:
+1. Set your npm registry if you did not already do so when you installed Zowe CLI. Issue the following command:
+
+    ```
+    npm config set @brightside:registry https://api.bintray.com/npm/ca/brightside
+    ```
+    
+2. Open a command line window and issue the following command:
 
     ```
     zowe plugins install @brightside/db2 
     ```
 
-2. After the command execution completes, issue the following command to validate that the installation completed successfully.
+3. After the command execution completes, issue the following command to validate that the installation completed successfully.
 
     ```
     zowe plugins validate db2
