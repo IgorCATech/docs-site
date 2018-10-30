@@ -51,7 +51,7 @@ If you installed Zowe CLI from online registry, complete the following steps:
 
     Successful validation of the IBM Db2 plug-in returns the response: `Successfully validated`.
 
-### Installing from package
+### Installing from local package
 
 If you downloaded the Zowe installation package from **Github**, complete the following steps:
 
@@ -73,7 +73,7 @@ If you downloaded the Zowe installation package from **Github**, complete the fo
     ```
     zowe plugins install zowe-cli-db2-1.0.0.tgz
     ```
-4. After the command execution completes, issue the following command to validate that the installation completed successfully.
+4. (Optional) After the command execution completes, issue the following command to validate that the installation completed successfully.
 
     ```
     zowe plugins validate db2
@@ -119,6 +119,9 @@ Review the created profile and edit if necessary using the profile update comman
 ## Commands  
 
 The following commands can be issued with the Zowe CLI Plug-in for IBM Db2:
+  - [Calling a stored procedure](#calling-a-stored-procedure)
+  - [Executing an SQL statement](#executing-an-sql-statement)
+  - [Exporting a table in SQL format](#exporting-a-table-in-sql-format)
 
 **Tip:** At any point, you can issue the help command `-h` to see a list of available commands.
 
@@ -127,19 +130,19 @@ The following commands can be issued with the Zowe CLI Plug-in for IBM Db2:
 Issue the following command to call a stored procedure that returns a result set:
 
 ```
-$ zowe db2 call sp "DEMOUSER.EMPBYNO('000120')"
+zowe db2 call sp "DEMOUSER.EMPBYNO('000120')"
 ```
 
 Issue the following command to call a stored procedure and pass parameters:
 
 ```
-$ zowe db2 call sp "DEMOUSER.SUM(40, 2, ?)" --parameters 0
+zowe db2 call sp "DEMOUSER.SUM(40, 2, ?)" --parameters 0
 ```
 
 Issue the following command to call a stored procedure and pass a placeholder buffer:
 
 ```
-$ zowe db2 call sp "DEMOUSER.TIME1(?)" --parameters "....placeholder..
+zowe db2 call sp "DEMOUSER.TIME1(?)" --parameters "....placeholder.."
 ```
 
 ### Executing an SQL statement 
@@ -147,13 +150,13 @@ $ zowe db2 call sp "DEMOUSER.TIME1(?)" --parameters "....placeholder..
 Issue the following command to count rows in the EMP table:
 
 ```
-$ zowe db2 execute sql -q "SELECT COUNT(*) AS TOTAL FROM DSN81210.EMP;"
+zowe db2 execute sql -q "SELECT COUNT(*) AS TOTAL FROM DSN81210.EMP;"
 ```
 
 Issue the following command to get a department name by ID:
 
 ```
-$ zowe db2 execute sql -q "SELECT DEPTNAME FROM DSN81210.DEPT WHERE DEPTNO='D01'
+zowe db2 execute sql -q "SELECT DEPTNAME FROM DSN81210.DEPT WHERE DEPTNO='D01'
 ```
 
 ### Exporting a table in SQL format
@@ -162,13 +165,13 @@ Issue the following command to export the `PROJ` table and save the generated 
 statements:
 
 ```
-$ zowe db2 export table DSN81210.PROJ
+zowe db2 export table DSN81210.PROJ
 ```
 
 Issue the following command to export the `PROJ` table and save the output to a file:
 
 ```
-$ zowe db2 export table DSN81210.PROJ --outfile projects-backup.sql 
+zowe db2 export table DSN81210.PROJ --outfile projects-backup.sql 
 ```
 
 You can also pipe the output to gzip for on-the-fly compression.
