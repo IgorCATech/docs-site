@@ -25,25 +25,31 @@ Before you install the plug-in, meet the following prerequisites:
 
 ## Installing
 
-There are **two methods** that you can use to install the Zowe CLI Plug-in for IBM Db2 Database - install from Bintray or install from the Zowe package.
+There are **two methods** that you can use to install the Zowe CLI Plug-in for IBM Db2 Database - install from online registry or install from the Zowe package.
 
-### Installing from Bintray
+### Installing from online registry
 
-If you installed Zowe CLI from **Bintray**, complete the following steps:
+If you installed Zowe CLI from online registry, complete the following steps:
 
-1. Open a command line window and issue the following command:
+1. Set your npm registry if you did not already do so when you installed Zowe CLI. Issue the following command:
 
     ```
-    zowe plugins install @brightside/db2 
+    npm config set @brightside:registry https://api.bintray.com/npm/ca/brightside
+    ```
+    
+2. Open a command line window and issue the following command:
+
+    ```
+    zowe plugins install @brightside/db2 
     ```
 
-2. After the command execution completes, issue the following command to validate that the installation completed successfully.
+3. After the command execution completes, issue the following command to validate that the installation completed successfully.
 
     ```
     zowe plugins validate db2
     ```
 
-    Successful validation of the IBM Db2 plug-in returns the response: `Successfully validated`.
+    Successful validation of the IBM Db2 plug-in returns the response: `Successfully validated`.
 
 ### Installing from package
 
