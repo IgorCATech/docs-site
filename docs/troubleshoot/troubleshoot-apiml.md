@@ -162,89 +162,35 @@ Restart API Mediation Layer.
 
 **Tip:**  To prevent this issue from occurring, it is strongly recommended not to restart TCP/IP stack while the API ML is running.
 
-### Unexpected error when logging in to API Catalog
 
-**Symptom:**
-
-Failure to log in to API Catalog that is caused by failed z/OSMF authentication.
-
-**Sample message:**
-
-The following message is displayed when attempting to log in to API Catalog:
-
-```
-Unexpected error, please try again later (SEC0002)
-```
-
-**Solution:**
-
-Open ZOWESVR joblog and look for a message containing `ZosmfAuthenticationProvider` to identify the nature of the issue. Use one of the following solutions to fix the issue:
-
-- [Change z/OSMF configuration](#change-z/osmf-configuration)
-- [Fix the z/OSMF certificate](#fix-the-z/osmf-certificate)
-- [Fix a DNS name in z/OSMF certificate](#fix-a-dns-name-in-z/osmf-certificate)
-
-#### Change z/OSMF configuration
-
-Change z/OSMF configuration.
-
-**Follow these steps:**
-
-1. Ensure that z/OSMF listens on localhost 127.0.0.1.
-2. Identify z/OSMF PARMLIB member IZUPRMxx in SYS1.PARMLIB(IZUPRM00).
-3. Change `HOSTNAME('10.175.81.28')` to `HOSTNAME('*')`.
-<!-- TODO. We might need more context here -->
-For more information, see [Syntax rules for IZUPRMxx](https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.3.0/com.ibm.zos.v2r3.izua300/izuconfig_IZUPRMxx.htm).
-<!-- TODO. Check why this link was provided in the first place. Maybe we should expand the procedure to include all necessary steps that will fix the issue -->
-
-#### Fix the z/OSMF certificate
-
-Fix the invalid certificate for z/OSMF.
-<!-- TODO. There are two ways of fixing the issue, but I'd rather pick one (most suitable) -->
-**Follow these steps:**
-
-1. Obtain a valid certificate for z/OSMF and place it into the z/OSMF keyring. For more information, see [Configure the z/OSMF Keyring and Certificate](https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.3.0/com.ibm.zos.v2r3.izua300/izuconfig_KeyringAndCertificate.htm).
-2. Navigate to `$ZOWE_RUNTIME/api-mediation` and run the following command:
-    ```
-    scripts/apiml_cm.sh --action trust-zosmf 
-    ```
-3. (Optional) If you do not use the default z/OSMF userid (IZUSVR) and keyring (IZUKeyring.IZUDFLT), issue the following command:
-    ```
-    scripts/apiml_cm.sh --action trust-zosmf --zosmf-userid **ZOSMF_USER** --zosmf-keyring **ZOSMF_KEYRING**
-    ```
-    The `--zosmf-keyring` and `--zosmf-userid` options override the default userid and keyring.
-<!-- TODO. Probably we should not add the insecure way of fixing this issue. -->
-
-#### Fix a DNS name in z/OSMF certificate
-
-Use one of the following options to fix a DNS name in the z/OSMF certificate:
-
-- Request a new certificate that contains the existing DNS name.
-- Change `ZOWE_EXPLORER_HOST` to a DNS name from subject alternative names of the z/OSMF certificate in `.zowe_profile` in home directory of user who installs Zowe. 
-<!-- TODO. It's not "runs", it's smth else instead-->
-
-
-___
 ### SEC0002 error when logging in to API Catalog
 
-SEC0002 error typically appears when users fail to log in to API Catalog. The following image shows how the SEC0002 looks like:
-![SEC0002 error](image link.png "SEC0002 Error")
-<!-- TODO. Upload the image -->
-The failure can be caused by three reasons. To find out a specific reason, open ZOWESVR joblog and look for a message that contains `ZosmfAuthenticationProvider`. 
+SEC0002 error typically appears when users fail to log in to API Catalog. The following image shows how the API Catalog login page with the SEC0002 error looks.
 
-**Symptom:**
+<img src="Error.png" alt="SEC0002 Error" title="SEC0002 Error" width="450" height="350"/>
 
-Failure to log in to API Catalog that is caused by incorrect z/OSMF configuration. 
+The error is caused by failed z/OSMF authentication. To find out the reason, open ZOWESVR joblog and look for a message that contains `ZosmfAuthenticationProvider`. The following is the example of the message that contains `ZosmfAuthenticationProvider`:
 
-**Sample message:**
+```
+2019-06-21 11:25:03.441 ERROR 5 --- .0.0-7552-exec-3. c.c.m.s.l.ZosmfAuthenticationProvider    : Can not access z/OSMF service. Uri 'https://MVSDE25.lvn.broadcom.net:1443' returned: I/O error on GET request for "https://MVSDE25.lvn.broadcom.net:1443/zosmf/info": ... 
+```
 
-The following message is displayed when attempting to log in to API Catalog:
+ Depending on the content of the message, you can identify the exact cause of the problem. The following list provides the possible reasons and solutions for the z/OSMF authentication issue:
+
+- [Connection refused](#connection-refused)
+- [Missing z/OSMF host name in subject alternative names](#missing-z/osmf-host-name-in-subject-alternative-names)
+- [Invalid z/OSMF host name in subject alternative names](#invalid-z/osmf-host-name-in-subject-alternative-names)
+
+#### Connection refused
+
+Based on the following message, failure to connect to API Catalog is caused by the refused connection message:
 
 ```
 Connect to MVSDE25.lvn.broadcom.net:1443 .MVSDE25.lvn.broadcom.net/127.0.0.1. failed: EDC8128I Connection refused.; nested exception is org.apache.http.conn.HttpHostConnectException: 
 ```
+The reason for the refused connection message is invalid z/OSMF configuration. Provided the message above, z/OSMF is not listening on 127.0.0.1.
 
-**Solutions:**
+**Solution:**
 
 Change z/OSMF configuration.
 
@@ -252,28 +198,22 @@ Change z/OSMF configuration.
 
 1. Ensure that z/OSMF listens on localhost 127.0.0.1.
 2. Identify z/OSMF PARMLIB member IZUPRMxx in SYS1.PARMLIB(IZUPRM00).
-3. Change `HOSTNAME('10.175.81.28')` to `HOSTNAME('*')`.
+3. Change the current `HOSTNAME` configuration to `HOSTNAME('*')`.
 
 For more information, see [Syntax rules for IZUPRMxx](https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.3.0/com.ibm.zos.v2r3.izua300/izuconfig_IZUPRMxx.htm).
 
-If the above mentioned method did not fix the issue, try to reconfigure Zowe. 
+If changing the z/OSMF confifuration does not fix the issue, reconfigure Zowe. 
 
 **Follow these steps:**
 
 1. Open `.zowe_profile` in home directory of a user who installed Zowe. 
 2. Modify the value of the `ZOWE_ZOSMF_PORT` variable. 
-3. Reinstall (or Restart) Zowe.
+3. Reinstall Zowe.
 
 
-### SEC0002 error when logging in to API Catalog
+#### Missing z/OSMF host name in subject alternative names
 
-**Symptom:**
-
-Failure to log in to API Catalog that is caused by invalid z/OSMF certificate.
-
-**Sample message:**
-
-The following message is displayed when attempting to log in to API Catalog:
+Based on the following message, failure to connect to API Catalog is caused by a missing z/OSMF host name in the subject alternative names:
 
 ```
 Certificate for <MVSDE25.lvn.broadcom.net> doesn't match any of the subject alternative names: ..; nested exception is javax.net.ssl.SSLPeerUnverifiedException: Certificate for <MVSDE25.lvn.broadcom.net> doesn't match any of the subject alternative names: ..
@@ -281,16 +221,14 @@ Certificate for <MVSDE25.lvn.broadcom.net> doesn't match any of the subject alte
 
 **Solutions:**
 
-Fix the invalid certificate for z/OSMF using the following methods:
+Fix the missing z/OSMF host name in subject alternative names using the following methods:
 
-**Note:** {something about danger of the second method}
+**Note:** Apply the insecure fix only if you use API Catalog for testing purposes.
 
-- [Suitable for production fix](#suitable-for-production-fix)
-- [Insecure quick fix](#insecure-quick-fix)
+- [Secure fix](#Secure-fix)
+- [Insecure fix](#insecure-fix)
 
-#### Suitable for production fix
-
-Resolve the invalid z/OSMF certificate issue by applying the suitable for production fix.
+#### Secure fix
 
 **Follow these steps:**
 
@@ -307,25 +245,16 @@ Resolve the invalid z/OSMF certificate issue by applying the suitable for produc
     where
     - `--zosmf-keyring` and `--zosmf-userid` - options that override the default userid and keyring accordingly.
 
-#### Insecure quick fix
-
-Apply the insecure quick fix only if you use API Catalog for testing purposes. 
+#### Insecure fix
 
 **Follow these steps:**
 
 1. Reinstall Zowe.
-2. Set the `verifyCertificatesOfServices` property to `false` in `zowe-install.yaml` to disable verification of certificates in Zowe.
+2. Set the value of the `verifyCertificatesOfServices` property to `false` in `zowe-install.yaml`, to disable verification of certificates in Zowe.
 
+#### Invalid z/OSMF host name in subject alternative names
 
-### SEC0002 error when logging in to API Catalog
-
-**Symptom:**
-
-Failure to log in to API Catalog that is caused by a host name not listed in the z/OSMF certificate.
-
-**Sample message:**
-
-The following message is displayed when attempting to log in to API Catalog:
+Based on the following message, failure to connect to API Catalog is caused by an invalid z/OSMF host name in the subject alternative names:
 
 ```
 Certificate for <USILCA32.lvn.broadcom.net> doesn't match any of the subject alternative names: [ca32.ca.com, ca32, localhost, ca32-virt, ca32-virt.ca.com, ca32-virt1, ca32-virt1.ca.com, ca32-virt2, ca32-virt2.ca.com, usilca32, usilca32.ca.com]; 
@@ -334,7 +263,7 @@ nested exception is javax.net.ssl.SSLPeerUnverifiedException: Certificate for <U
 
 **Solutions:**
 
-Fix the missing z/osmf host name in subject alternative names using the following methods:
+Fix the invalid z/osmf host name in the subject alternative names using the following methods:
 
 - [Request a new certificate](#request-a-new-certificate)
 - [Change the ZOWE_EXPLORER_HOST variable](#change-the-zowe_explorer_host-variable)
@@ -345,12 +274,12 @@ Request a new certificate that contains a valid z/OSMF host name in the subject 
 
 #### Change the ZOWE_EXPLORER_HOST variable
 
-Alternatively, you can change `ZOWE_EXPLORER_HOST` variable to fix the issue
+Change `ZOWE_EXPLORER_HOST` variable to fix the issue.
 
 **Follow these steps:**
 
-1. Open .zowe_profile in home directory of user who installed Zowe.
-2. Change  `ZOWE_EXPLORER_HOST` to to a host name from subject alternative names of the z/OSMF certificate. For example, issue the following command:
+1. Open .zowe_profile in home directory of the user who installed Zowe.
+2. Change  `ZOWE_EXPLORER_HOST` to to a host name from the subject alternative names of the z/OSMF certificate. For example, issue the following command:
     ```
     export ZOWE_EXPLORER_HOST=SAN (change this to the correct one > in the code block).
     ```
